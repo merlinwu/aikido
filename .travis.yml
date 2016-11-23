@@ -28,3 +28,5 @@ script:
 - ./scripts/internal-run.sh make -C build/aikido coveralls
 after_script:
 - ./scripts/view-all-results.sh test_results
+after_success:
+- bash <(curl -s https://codecov.io/bash)
