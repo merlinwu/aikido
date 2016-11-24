@@ -1,6 +1,0 @@
-# Codecov documentation is available here: http://docs.codecov.io/docs/codecov-yaml
-
-coverage:
-  ignore:
-    - src/aikido/tests
-    - src/aikido/src/external/hauser_parabolic_smoother
