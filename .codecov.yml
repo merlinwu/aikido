@@ -2,6 +2,7 @@
 
 coverage:
   ignore:
+    - *
     - tests/.*
     - src/external/hauser_parabolic_smoother/.*
     - src/aikido/tests/.*
