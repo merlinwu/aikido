@@ -18,3 +18,4 @@ add_component_targets(${PROJECT_NAME} trajectory "${PROJECT_NAME}_trajectory")
 add_component_dependencies(${PROJECT_NAME} trajectory statespace util)
 
 coveralls_add_sources(${sources})
+format_add_sources(${sources})

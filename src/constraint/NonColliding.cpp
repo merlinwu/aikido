@@ -1,5 +1,5 @@
-#include <aikido/constraint/NonColliding.hpp>
 #include <dart/dart.hpp>
+#include <aikido/constraint/NonColliding.hpp>
 
 using dart::collision::BodyNodeCollisionFilter;
 
@@ -10,11 +10,11 @@ namespace constraint {
 NonColliding::NonColliding(
     statespace::dart::MetaSkeletonStateSpacePtr _statespace,
     std::shared_ptr<dart::collision::CollisionDetector> _collisionDetector)
-: NonColliding(
-    std::move(_statespace),
-    std::move(_collisionDetector),
-    dart::collision::CollisionOption(
-      false, 1, std::make_shared<BodyNodeCollisionFilter>()))
+  : NonColliding(
+        std::move(_statespace),
+        std::move(_collisionDetector),
+        dart::collision::CollisionOption(
+            false, 1, std::make_shared<BodyNodeCollisionFilter>()))
 {
 }
 
@@ -23,16 +23,15 @@ NonColliding::NonColliding(
     statespace::dart::MetaSkeletonStateSpacePtr _statespace,
     std::shared_ptr<dart::collision::CollisionDetector> _collisionDetector,
     dart::collision::CollisionOption _collisionOptions)
-: statespace(std::move(_statespace))
-, collisionDetector(std::move(_collisionDetector))
-, collisionOptions(std::move(_collisionOptions))
+  : statespace(std::move(_statespace))
+  , collisionDetector(std::move(_collisionDetector))
+  , collisionOptions(std::move(_collisionOptions))
 {
   if (!statespace)
     throw std::invalid_argument("_statespace is nullptr.");
 
   if (!collisionDetector)
     throw std::invalid_argument("_collisionDetector is nullptr.");
-
 }
 
 //=============================================================================
@@ -45,24 +44,29 @@ statespace::StateSpacePtr NonColliding::getStateSpace() const
 bool NonColliding::isSatisfied(
     const aikido::statespace::StateSpace::State* _state) const
 {
-  auto skelStatePtr =
-    static_cast<const aikido::statespace::dart::MetaSkeletonStateSpace::State*>(
-      _state);
+  auto skelStatePtr = static_cast<const aikido::statespace::dart::
+                                      MetaSkeletonStateSpace::State*>(_state);
   statespace->setState(skelStatePtr);
 
   bool collision = false;
   dart::collision::CollisionResult collisionResult;
-  for (auto groups : groupsToPairwiseCheck) {
-    collision =
-        collisionDetector->collide(groups.first.get(), groups.second.get(),
-                                   collisionOptions, &collisionResult);
-    if (collision) return false;
+  for (auto groups : groupsToPairwiseCheck)
+  {
+    collision = collisionDetector->collide(
+        groups.first.get(),
+        groups.second.get(),
+        collisionOptions,
+        &collisionResult);
+    if (collision)
+      return false;
   }
 
-  for (auto group : groupsToSelfCheck) {
-    collision = collisionDetector->collide(group.get(), collisionOptions,
-                                           &collisionResult);
-    if (collision) return false;
+  for (auto group : groupsToSelfCheck)
+  {
+    collision = collisionDetector->collide(
+        group.get(), collisionOptions, &collisionResult);
+    if (collision)
+      return false;
   }
   return true;
 }
@@ -81,6 +85,5 @@ void NonColliding::addSelfCheck(
 {
   groupsToSelfCheck.emplace_back(std::move(_group));
 }
-
 }
 }

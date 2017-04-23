@@ -427,11 +427,11 @@ std::pair<std::unique_ptr<trajectory::Interpolated>, bool> simplifyOMPL(
 
     bool const shortened
         = simplifier.shortcutPath(path, 1, _maxEmptySteps, 1.0, 0.0);
-    if(shortened) 
+    if (shortened)
       empty_steps = 0;
     else
       empty_steps += 1;
-    
+
     time_current = std::chrono::system_clock::now();
     shorten_success = shorten_success || shortened;
 

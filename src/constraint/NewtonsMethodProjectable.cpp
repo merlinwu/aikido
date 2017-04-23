@@ -1,21 +1,23 @@
-#include <aikido/constraint/NewtonsMethodProjectable.hpp>
-#include <limits>
-#include <aikido/util/PseudoInverse.hpp>
-#include <math.h>
-#include <dart/math/Geometry.hpp>
 #include <iostream>
+#include <limits>
+#include <dart/math/Geometry.hpp>
+#include <math.h>
+#include <aikido/constraint/NewtonsMethodProjectable.hpp>
+#include <aikido/util/PseudoInverse.hpp>
 
-namespace aikido{
-namespace constraint{
+namespace aikido {
+namespace constraint {
 
 //=============================================================================
 NewtonsMethodProjectable::NewtonsMethodProjectable(
-  DifferentiablePtr _differentiable, std::vector<double> _tolerance,
-  int _maxIteration, double _minStepSize)
-: mDifferentiable(std::move(_differentiable))
-, mTolerance(std::move(_tolerance))
-, mMaxIteration(_maxIteration)
-, mMinStepSize(_minStepSize)
+    DifferentiablePtr _differentiable,
+    std::vector<double> _tolerance,
+    int _maxIteration,
+    double _minStepSize)
+  : mDifferentiable(std::move(_differentiable))
+  , mTolerance(std::move(_tolerance))
+  , mMaxIteration(_maxIteration)
+  , mMinStepSize(_minStepSize)
 {
   if (!mDifferentiable)
     throw std::invalid_argument("_differentiable is nullptr.");
@@ -46,13 +48,13 @@ NewtonsMethodProjectable::NewtonsMethodProjectable(
 
 //=============================================================================
 bool NewtonsMethodProjectable::contains(
-  const statespace::StateSpace::State* _s) const
+    const statespace::StateSpace::State* _s) const
 {
   Eigen::VectorXd values;
   mDifferentiable->getValue(_s, values);
   std::vector<ConstraintType> types = mDifferentiable->getConstraintTypes();
 
-  for(int i = 0; i < values.size(); i++)
+  for (int i = 0; i < values.size(); i++)
   {
     if (types.at(i) == ConstraintType::EQUALITY)
     {
@@ -72,8 +74,8 @@ bool NewtonsMethodProjectable::contains(
 
 //=============================================================================
 bool NewtonsMethodProjectable::project(
-  const statespace::StateSpace::State* _s,
-  statespace::StateSpace::State* _out) const
+    const statespace::StateSpace::State* _s,
+    statespace::StateSpace::State* _out) const
 {
   using StateSpace = statespace::StateSpace;
 
@@ -85,7 +87,7 @@ bool NewtonsMethodProjectable::project(
   StateSpace::ScopedState step(mStateSpace.get());
 
   /// Newton's method on mDifferentiable
-  while(!contains(_out) && iteration < mMaxIteration)
+  while (!contains(_out) && iteration < mMaxIteration)
   {
     iteration++;
 
@@ -93,15 +95,14 @@ bool NewtonsMethodProjectable::project(
     mDifferentiable->getValue(_out, value);
     Eigen::MatrixXd jac;
     mDifferentiable->getJacobian(_out, jac);
-    
+
     // Minimization step in tangent space.
-    Eigen::VectorXd tangentStep = -1*util::pseudoinverse(jac)*value;
+    Eigen::VectorXd tangentStep = -1 * util::pseudoinverse(jac) * value;
 
-    // Break if tangent step is too small. 
-    if (tangentStep.maxCoeff() < mMinStepSize &&
-        (-1*tangentStep).maxCoeff() < mMinStepSize)
+    // Break if tangent step is too small.
+    if (tangentStep.maxCoeff() < mMinStepSize
+        && (-1 * tangentStep).maxCoeff() < mMinStepSize)
       break;
-
 
     // Minimization step in state space.
     mStateSpace->expMap(tangentStep, step);
@@ -112,7 +113,6 @@ bool NewtonsMethodProjectable::project(
     return false;
 
   return true;
-
 }
 
 //=============================================================================
@@ -120,7 +120,6 @@ statespace::StateSpacePtr NewtonsMethodProjectable::getStateSpace() const
 {
   return mDifferentiable->getStateSpace();
 }
-
 
 } // namespace constraint
 } // namespace aikido

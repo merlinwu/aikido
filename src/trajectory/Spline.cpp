@@ -1,14 +1,12 @@
-#include <aikido/util/Spline.hpp>
 #include <aikido/trajectory/Spline.hpp>
+#include <aikido/util/Spline.hpp>
 
 namespace aikido {
 namespace trajectory {
 
 //=============================================================================
-Spline::Spline(
-      statespace::StateSpacePtr _stateSpace, double _startTime)
-  : mStateSpace(std::move(_stateSpace))
-  , mStartTime(_startTime)
+Spline::Spline(statespace::StateSpacePtr _stateSpace, double _startTime)
+  : mStateSpace(std::move(_stateSpace)), mStartTime(_startTime)
 {
   if (mStateSpace == nullptr)
     throw std::invalid_argument("StateSpace is null.");
@@ -22,13 +20,15 @@ Spline::~Spline()
 }
 
 //=============================================================================
-void Spline::addSegment(const Eigen::MatrixXd& _coefficients,
-  double _duration, const statespace::StateSpace::State* _startState)
+void Spline::addSegment(
+    const Eigen::MatrixXd& _coefficients,
+    double _duration,
+    const statespace::StateSpace::State* _startState)
 {
   if (_duration <= 0.)
     throw std::invalid_argument("Duration must be positive.");
 
-  if (static_cast<size_t>(_coefficients.rows()) != mStateSpace->getDimension()) 
+  if (static_cast<size_t>(_coefficients.rows()) != mStateSpace->getDimension())
     throw std::invalid_argument("Incorrect number of dimensions.");
 
   if (_coefficients.cols() < 1)
@@ -44,12 +44,12 @@ void Spline::addSegment(const Eigen::MatrixXd& _coefficients,
 }
 
 //=============================================================================
-void Spline::addSegment(
-  const Eigen::MatrixXd& _coefficients, double _duration)
+void Spline::addSegment(const Eigen::MatrixXd& _coefficients, double _duration)
 {
   if (mSegments.empty())
     throw std::logic_error(
-      "An explicit start state is required because this trajectory is empty.");
+        "An explicit start state is required because this trajectory is "
+        "empty.");
 
   auto startState = mStateSpace->createState();
   evaluate(getEndTime(), startState);
@@ -76,8 +76,8 @@ size_t Spline::getNumDerivatives() const
 
   for (const auto& segment : mSegments)
   {
-    numDerivatives = std::max<size_t>(
-      numDerivatives, segment.mCoefficients.cols() - 1);
+    numDerivatives
+        = std::max<size_t>(numDerivatives, segment.mCoefficients.cols() - 1);
   }
 
   return numDerivatives;
@@ -107,8 +107,7 @@ double Spline::getDuration() const
 }
 
 //=============================================================================
-void Spline::evaluate(
-  double _t, statespace::StateSpace::State *_out) const
+void Spline::evaluate(double _t, statespace::StateSpace::State* _out) const
 {
   if (mSegments.empty())
     throw std::logic_error("Unable to evaluate empty trajectory.");
@@ -119,8 +118,8 @@ void Spline::evaluate(
   mStateSpace->copyState(targetSegment.mStartState, _out);
 
   const auto evaluationTime = _t - targetSegmentInfo.second;
-  const auto tangentVector = evaluatePolynomial(
-    targetSegment.mCoefficients, evaluationTime, 0);
+  const auto tangentVector
+      = evaluatePolynomial(targetSegment.mCoefficients, evaluationTime, 0);
 
   const auto relativeState = mStateSpace->createState();
   mStateSpace->expMap(tangentVector, relativeState);
@@ -128,8 +127,8 @@ void Spline::evaluate(
 }
 
 //=============================================================================
-void Spline::evaluateDerivative(double _t, int _derivative,
-  Eigen::VectorXd& _tangentVector ) const
+void Spline::evaluateDerivative(
+    double _t, int _derivative, Eigen::VectorXd& _tangentVector) const
 {
   if (mSegments.empty())
     throw std::logic_error("Unable to evaluate empty trajectory.");
@@ -146,7 +145,7 @@ void Spline::evaluateDerivative(double _t, int _derivative,
     // TODO: We should transform this into the body frame using the adjoint
     // transformation.
     _tangentVector = evaluatePolynomial(
-      targetSegment.mCoefficients, evaluationTime, _derivative);
+        targetSegment.mCoefficients, evaluationTime, _derivative);
   }
   else
   {
@@ -173,22 +172,23 @@ std::pair<size_t, double> Spline::getSegmentForTime(double _t) const
 
   // After the end of the last segment.
   return std::make_pair(
-    mSegments.size() - 1, segmentStartTime - mSegments.back().mDuration);
+      mSegments.size() - 1, segmentStartTime - mSegments.back().mDuration);
 }
 
 //=============================================================================
 Eigen::VectorXd Spline::evaluatePolynomial(
-  const Eigen::MatrixXd& _coefficients, double _t, int _derivative)
+    const Eigen::MatrixXd& _coefficients, double _t, int _derivative)
 {
   const auto numOutputs = _coefficients.rows();
   const auto numCoeffs = _coefficients.cols();
 
-  const auto timeVector = util::SplineProblem<>::createTimeVector(
-    _t, _derivative, numCoeffs);
-  const auto derivativeMatrix = util::SplineProblem<>::createCoefficientMatrix(
-    numCoeffs);
+  const auto timeVector
+      = util::SplineProblem<>::createTimeVector(_t, _derivative, numCoeffs);
+  const auto derivativeMatrix
+      = util::SplineProblem<>::createCoefficientMatrix(numCoeffs);
   const auto derivativeVector = derivativeMatrix.row(_derivative);
-  const auto evaluationVector = derivativeVector.cwiseProduct(timeVector.transpose());
+  const auto evaluationVector
+      = derivativeVector.cwiseProduct(timeVector.transpose());
 
   Eigen::VectorXd outputVector(numOutputs);
 

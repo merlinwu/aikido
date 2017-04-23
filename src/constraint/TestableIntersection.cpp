@@ -1,5 +1,5 @@
-#include <aikido/constraint/TestableIntersection.hpp>
 #include <stdexcept>
+#include <aikido/constraint/TestableIntersection.hpp>
 
 namespace aikido {
 namespace constraint {
@@ -8,13 +8,13 @@ namespace constraint {
 TestableIntersection::TestableIntersection(
     statespace::StateSpacePtr _stateSpace,
     std::vector<std::shared_ptr<Testable>> _constraints)
-: mStateSpace(std::move(_stateSpace))
-, mConstraints(std::move(_constraints))
+  : mStateSpace(std::move(_stateSpace)), mConstraints(std::move(_constraints))
 {
   if (!mStateSpace)
     throw std::invalid_argument("_statespace is nullptr.");
 
-  for (auto c : mConstraints) {
+  for (auto c : mConstraints)
+  {
     testConstraintStateSpaceOrThrow(c);
   }
 }
@@ -23,8 +23,10 @@ TestableIntersection::TestableIntersection(
 bool TestableIntersection::isSatisfied(
     const aikido::statespace::StateSpace::State* _state) const
 {
-  for (auto c : mConstraints) {
-    if (!c->isSatisfied(_state)) {
+  for (auto c : mConstraints)
+  {
+    if (!c->isSatisfied(_state))
+    {
       return false;
     }
   }
@@ -40,9 +42,12 @@ statespace::StateSpacePtr TestableIntersection::getStateSpace() const
 //=============================================================================
 void TestableIntersection::addConstraint(TestablePtr _constraint)
 {
-  if (_constraint->getStateSpace() == mStateSpace) {
+  if (_constraint->getStateSpace() == mStateSpace)
+  {
     mConstraints.emplace_back(std::move(_constraint));
-  } else {
+  }
+  else
+  {
     throw std::invalid_argument{
         "Constraints must all be in specified StateSpace"};
   }
@@ -50,13 +55,13 @@ void TestableIntersection::addConstraint(TestablePtr _constraint)
 
 //=============================================================================
 void TestableIntersection::testConstraintStateSpaceOrThrow(
-  const TestablePtr& constraint)
+    const TestablePtr& constraint)
 {
-  if (constraint->getStateSpace() != mStateSpace) {
+  if (constraint->getStateSpace() != mStateSpace)
+  {
     throw std::invalid_argument{
         "Constraints must all be in specified StateSpace"};
   }
 }
-
 }
 }

@@ -47,3 +47,4 @@ add_component_targets(${PROJECT_NAME} constraint "${PROJECT_NAME}_constraint")
 add_component_dependencies(${PROJECT_NAME} constraint statespace util)
 
 coveralls_add_sources(${sources})
+format_add_sources(${sources})
